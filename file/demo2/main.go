@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	common "godemo/file"
 	"os"
 	"path/filepath"
 	"time"
@@ -20,13 +21,11 @@ type node struct {
 
 func main() {
 	var (
-		err      error
-		filePath string
-		tree     map[string]node
+		err  error
+		tree map[string]node
 	)
-	filePath = "./file/"
 	//读取指定目录下的目录和文件到map
-	if tree, err = readDir(filePath); err != nil {
+	if tree, err = readDir(common.DirPath); err != nil {
 		panic(err)
 	}
 	fmt.Printf("%+v", tree)

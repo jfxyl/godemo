@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	common "godemo/file"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,21 +13,17 @@ import (
 func main() {
 	var (
 		err         error
-		dirPath     string
-		filePath    string
 		file        *os.File
 		fileContent []byte
 	)
-	dirPath = "./file/tmp/testdir1/testdir2"
-	filePath = dirPath + "/testfile"
-	if file, err = os.Open(filePath); err != nil {
+	if file, err = os.Open(common.FilePath); err != nil {
 		panic(err)
 	}
 
 	defer file.Close()
 
 	//使用ioutil库读取文件
-	if fileContent, err = ioutil.ReadFile(filePath); err != nil {
+	if fileContent, err = ioutil.ReadFile(common.FilePath); err != nil {
 		panic(err)
 	}
 	fmt.Println(string(fileContent))
@@ -36,11 +33,11 @@ func main() {
 	fmt.Println(string(fileContent))
 
 	//使用os库读取文件
-	if fileContent, err = os.ReadFile(filePath); err != nil {
+	if fileContent, err = os.ReadFile(common.FilePath); err != nil {
 		panic(err)
 	}
 	fmt.Println(string(fileContent))
-	if fileContent, err = readFile(filePath); err != nil {
+	if fileContent, err = readFile(common.FilePath); err != nil {
 		panic(err)
 	}
 	fmt.Println(string(fileContent))
@@ -54,7 +51,7 @@ func main() {
 }
 
 //读取文件
-func readFile(filePath string) ([]byte, error) {
+func readFile(filepath string) ([]byte, error) {
 	var (
 		err     error
 		file    *os.File
@@ -63,7 +60,7 @@ func readFile(filePath string) ([]byte, error) {
 		content []byte
 	)
 	buf = make([]byte, 1024)
-	if file, err = os.Open(filePath); err != nil {
+	if file, err = os.Open(filepath); err != nil {
 		panic(err)
 	}
 	for {

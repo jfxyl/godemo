@@ -2,37 +2,34 @@ package main
 
 import (
 	"bufio"
+	common "godemo/file"
 	"io/ioutil"
 	"os"
 )
 
 func main() {
 	var (
-		err      error
-		file     *os.File
-		writer   *bufio.Writer
-		dirPath  string
-		filePath string
+		err    error
+		file   *os.File
+		writer *bufio.Writer
 	)
-	dirPath = "./file/tmp/testdir1/testdir2"
-	filePath = dirPath + "/testfile"
 	//创建一个嵌套目录
-	if err = os.MkdirAll(dirPath, 0755); err != nil {
+	if err = os.MkdirAll(common.DirPath, 0755); err != nil {
 		panic(err)
 	}
 	//创建一个文件
-	if file, err = os.OpenFile(filePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0755); err != nil {
+	if file, err = os.OpenFile(common.FilePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0755); err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
 	//使用ioutil库写入文件
-	if err = ioutil.WriteFile(filePath, []byte("ioutil.WriteFile写入测试文本\n"), 0755); err != nil { //会覆盖文件
+	if err = ioutil.WriteFile(common.FilePath, []byte("ioutil.WriteFile写入测试文本\n"), 0755); err != nil { //会覆盖文件
 		panic(err)
 	}
 
 	//使用os库写入文件
-	if err = os.WriteFile(filePath, []byte("os.WriteFile写入测试文本\n"), 0755); err != nil { //会覆盖文件
+	if err = os.WriteFile(common.FilePath, []byte("os.WriteFile写入测试文本\n"), 0755); err != nil { //会覆盖文件
 		panic(err)
 	}
 	if _, err = file.Write([]byte("os.File.Write写入测试文本\n")); err != nil {
