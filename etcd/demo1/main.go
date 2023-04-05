@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	"go.etcd.io/etcd/client/v3"
+	common "godemo/etcd"
 	"sync"
 	"time"
 )
@@ -12,7 +13,6 @@ import (
 func main() {
 	var (
 		err                    error
-		client                 *clientv3.Client
 		ctx                    context.Context
 		timeoutctx             context.Context
 		kv                     *mvccpb.KeyValue
@@ -26,19 +26,13 @@ func main() {
 	ctx = context.TODO()
 	wg = new(sync.WaitGroup)
 	wg.Add(1)
-	if client, err = clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
-		DialTimeout: 5 * time.Second,
-	}); err != nil {
-		panic(err)
-	}
 
 	//获取一个10s的租约
-	if leaseGrantResp, err = client.Grant(ctx, 10); err != nil {
+	if leaseGrantResp, err = common.Client.Grant(ctx, 10); err != nil {
 		panic(err)
 	}
 	//PUT数据携带上租约ID并返回PUT前数据
-	if putResp, err = client.Put(ctx, "/demo/key3", "value3", clientv3.WithPrevKV(), clientv3.WithLease(leaseGrantResp.ID)); err != nil {
+	if putResp, err = common.Client.Put(ctx, "/demo/key3", "value3", clientv3.WithPrevKV(), clientv3.WithLease(leaseGrantResp.ID)); err != nil {
 		panic(err)
 	}
 	if putResp.PrevKv != nil {
@@ -48,7 +42,7 @@ func main() {
 	}
 	//自动续租5s
 	timeoutctx, _ = context.WithTimeout(ctx, 5*time.Second)
-	if leaseKeepAliveRespChan, err = client.KeepAlive(timeoutctx, leaseGrantResp.ID); err != nil {
+	if leaseKeepAliveRespChan, err = common.Client.KeepAlive(timeoutctx, leaseGrantResp.ID); err != nil {
 		panic(err)
 	}
 	//处理续租应答
@@ -70,7 +64,7 @@ func main() {
 
 	go func() {
 		for {
-			if getResp, err = client.Get(ctx, "/demo/key3"); err != nil {
+			if getResp, err = common.Client.Get(ctx, "/demo/key3"); err != nil {
 				panic(err)
 			}
 			if len(getResp.Kvs) > 0 {
