@@ -1,0 +1,64 @@
+syntax="proto3";
+package person;
+option go_package = "grpc/proto/person";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/descriptor.proto";
+
+//性别
+enum genderType {
+  UNKNOWN = 0;
+  MALE = 1;
+  FEMALE = 2;
+}
+
+message Person{
+  int64 id = 1;
+  string name = 2;
+  genderType gender = 3;
+  string birthday = 4;
+  string avatar = 5;
+  string email = 6;
+  string phone = 7;
+  map<string,string> address = 8;
+  repeated string tags = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+service PersonService {
+  rpc GetPerson (GetPersonRequest) returns (Person) {}
+  rpc ListPerson (ListPersonRequest) returns (ListPersonResponse) {}
+  rpc CreatePerson (CreatePersonRequest) returns (Person) {}
+  rpc UpdatePerson (UpdatePersonRequest) returns (Person) {}
+  rpc DeletePerson (DeletePersonRequest) returns (DeletePersonResponse) {}
+}
+
+message GetPersonRequest {
+  int64 id = 1;
+}
+
+message ListPersonRequest {
+  int64 page = 1;
+  int64 size = 2;
+}
+
+message ListPersonResponse {
+  repeated Person persons = 1;
+}
+
+message CreatePersonRequest{
+  Person person = 1;
+}
+
+message UpdatePersonRequest{
+  Person person = 1;
+}
+
+message DeletePersonRequest{
+  int64 id = 1;
+}
+
+message DeletePersonResponse{
+}
+
+
