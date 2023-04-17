@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	DirPath  = "./file/tmp/"
-	FilePath = DirPath + "test.txt"
+	DirPath  = "./csv/tmp/"
+	FilePath = DirPath + "test.csv"
 )
 
 func init() {
