@@ -21,11 +21,11 @@ func main() {
 		cf    common.CloseFunc
 	)
 	//使用文件作为Exporter
-	//if tp, cf, err = common.TracerProviderByFile(); err != nil {
+	//if tp, cf, err = common.TracerProviderByFile(common.SERVICE_FIB); err != nil {
 	//	panic(err)
 	//}
 	//使用jaeger作为Exporter
-	if tp, cf, err = common.TracerProviderByJaeger("http://localhost:14268/api/traces"); err != nil {
+	if tp, cf, err = common.TracerProviderByJaeger(common.SERVICE_FIB, common.JaegerURL); err != nil {
 		panic(err)
 	}
 	defer cf()

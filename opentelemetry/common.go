@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
@@ -12,9 +13,19 @@ import (
 
 type CloseFunc func()
 
+const (
+	TRACER_PERSON  = "PERSON"
+	TRACER_FIB     = "FIB"
+	SERVICE_PERSON = "PERSON"
+	SERVICE_FIB    = "FIB"
+)
+
 var (
-	DirPath  = "./opentelemetry/tmp/"
-	FilePath = DirPath + "fib.txt"
+	DirPath   = "./opentelemetry/tmp/"
+	FilePath  = DirPath + "opentelemetry.txt"
+	JaegerURL = "http://localhost:14268/api/traces"
+
+	GrpcPort = ":7777"
 )
 
 func init() {
@@ -31,7 +42,7 @@ func init() {
 	}
 }
 
-func TracerProviderByFile() (tp *trace.TracerProvider, cf CloseFunc, err error) {
+func TracerProviderByFile(serviceName string) (tp *trace.TracerProvider, cf CloseFunc, err error) {
 	var (
 		file *os.File
 		exp  trace.SpanExporter
@@ -44,14 +55,24 @@ func TracerProviderByFile() (tp *trace.TracerProvider, cf CloseFunc, err error) 
 		fmt.Println(file)
 		file.Close()
 	}
+	exp, err = stdouttrace.New(
+		stdouttrace.WithWriter(file),
+		// Use human-readable output.
+		stdouttrace.WithPrettyPrint(),
+		// Do not print timestamps for the demo.
+		stdouttrace.WithoutTimestamps(),
+	)
+	if err != nil {
+		return nil, cf, err
+	}
 	tp = trace.NewTracerProvider(
 		trace.WithBatcher(exp),
-		trace.WithResource(newResource()),
+		trace.WithResource(newResource(serviceName)),
 	)
 	return tp, cf, nil
 }
 
-func TracerProviderByJaeger(url string) (tp *trace.TracerProvider, cf CloseFunc, err error) {
+func TracerProviderByJaeger(serviceName, url string) (tp *trace.TracerProvider, cf CloseFunc, err error) {
 	var (
 		exp trace.SpanExporter
 	)
@@ -61,15 +82,15 @@ func TracerProviderByJaeger(url string) (tp *trace.TracerProvider, cf CloseFunc,
 	}
 	tp = trace.NewTracerProvider(
 		trace.WithBatcher(exp),
-		trace.WithResource(newResource()),
+		trace.WithResource(newResource(serviceName)),
 	)
 	return tp, func() {}, nil
 }
 
-func newResource() *resource.Resource {
+func newResource(serviceName string) *resource.Resource {
 	return resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceName("fib"),
+		semconv.ServiceName(serviceName),
 		semconv.ServiceVersion("v0.1.0"),
 		attribute.String("environment", "demo"),
 	)
