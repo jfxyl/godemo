@@ -1,0 +1,28 @@
+# 启动 NameServ
+docker run -d \
+--name rmqnamesrv \
+-p 9876:9876 \
+-v E:/Docker/rocketmq/data/namesrv/logs:/home/rocketmq/logs \
+-v E:/Docker/rocketmq/data/namesrv/store:/home/rocketmq/store \
+-e "MAX_POSSIBLE_HEAP=100000000" \
+apache/rocketmq:4.9.4 \
+sh mqnamesrv
+
+# 启动 Broker
+docker run -d  \
+--name rmqbroker \
+--link rmqnamesrv:namesrv \
+-p 10911:10911 \
+-p 10909:10909 \
+-v E:/Docker/rocketmq/data/broker/logs:/home/rocketmq/logs \
+-v E:/Docker/rocketmq/data/broker/store:/home/rocketmq/store \
+-v E:/Docker/rocketmq/data/broker/conf/broker.conf:/home/rocketmq/rocketmq-4.9.4/conf/broker.conf \
+-e "NAMESRV_ADDR=namesrv:9876" \
+-e "MAX_POSSIBLE_HEAP=200000000" \
+apache/rocketmq:4.9.4 \
+sh mqbroker -c ../conf/broker.conf
+
+# docker-dashboard 启动命令
+docker run -d \
+--name rocketmq-dashboard \
+-e "JAVA_OPTS=-Drocketmq.namesrv.addr=192.168.2.5:9876" -p 18080:8080 -t apacherocketmq/rocketmq-dashboard:latest
